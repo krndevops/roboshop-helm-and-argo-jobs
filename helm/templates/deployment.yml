@@ -5,7 +5,6 @@ metadata:
   labels:
     app: {{ .Values.component }}
 spec:
-  # modify replicas according to your case
   replicas: {{ .Values.replica }}
   selector:
     matchLabels:
@@ -19,26 +18,25 @@ spec:
         - name: parameters-pull
           image: {{ .Values.initContainers.parameters_pull.image }}
           imagePullPolicy: {{ .Values.initContainers.parameters_pull.imagePullPolicy }}
-          resources:
-            requests:
-              memory: "100Mi"
-              cpu: "100m"
-            limits:
-              memory: "150Mi"
-              cpu: "100m"
           volumeMounts:
             {{- toYaml .Values.volumeMounts | nindent 12 }}
           env:
             - name: PARAMS
               value: {{ .Values.PARAMS }}
-
       containers:
         - name: {{ .Values.component }}
-          image:  {{ .Values.containers.main.image }}
+          image: {{ .Values.containers.main.image }}
           imagePullPolicy: {{ .Values.containers.main.imagePullPolicy }}
           volumeMounts:
             {{- toYaml .Values.volumeMounts | nindent 12 }}
-
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.service.containerPort }}
+            failureThreshold: 10
+            periodSeconds: 10
       volumes:
         - name: parameters
           emptyDir: {}

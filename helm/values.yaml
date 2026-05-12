@@ -1,3 +1,9 @@
 volumeMounts:
   - name: parameters
     mountPath: /parameters
+
+job:
+  enabled: false
+
+ingress:
+  enabled: false
